@@ -3,11 +3,12 @@
     <div class = "user-profile_sidebar">
       <div class="user-profile_user-panel">
         <h1 class="user-profile_username">@{{ state.user.username }}</h1>
+        <h2>{{ userId }}</h2>
         <div class="user-profile_admin-badge" v-if="state.user.isAdmin">
           Admin
         </div>
         <div class="user-profile_follower-count">
-          <strong>Followers: </strong> {{ followers }}
+          <strong>Followers: </strong> {{ state.followers }}
         </div>
       </div>
       <CreateTwootPanel @add-twoot="addTwoots"/>
@@ -24,42 +25,45 @@
 </template>
 
 <script>
-import TwootItem from "./TwootItem"
-import CreateTwootPanel from "./CreateTwootPanel"
-import { reactive } from '@vue/reactivity'
+import TwootItem from "../components/TwootItem.vue"
+import { users } from "../assets/users"
+import { useRoute } from 'vue-router'
+import CreateTwootPanel from "../components/CreateTwootPanel.vue"
+import { computed, reactive } from 'vue'
 
 export default {
   name: 'UserProfile',
   components: { TwootItem, CreateTwootPanel },
   setup() {
+    const route = useRoute();
+    const userId = computed(() => route.params.userId);
+
     const state = reactive({
       followers: 0,
-      user: {
-        id: 1,
-        username: '_Hyddd',
-        firstName: 'Yidan',
-        lastName: "Hu",
-        email: 'hyddd@njust.com',
-        isAdmin: true,
-        twoots: [
-            { id: 1, content: 'Twotter is Amazing!'},
-            { id: 2, content: "Don't forget to suscribe to Me!"}
-        ]
-      } 
+      user: users[userId.value - 1] || users[0]
     })
 
     function addTwoots(twoot) {
-        state.user.twoots.unshift(
-        {
-          id: state.user.twoots.length + 1,
-          content: twoot
+        if (state.user.twoots == null) {
+          state.user.twoots = [];
+          state.user.twoots.unshift(
+          {
+            id: state.user.twoots.length + 1,
+            content: twoot
+          })
+        } else {
+          state.user.twoots.unshift(
+          {
+            id: state.user.twoots.length + 1,
+            content: twoot
+          })
         }
-      );
     }
 
     return {
       state,
-      addTwoots
+      addTwoots,
+      userId
     }
   }
 }
